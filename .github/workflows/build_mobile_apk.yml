@@ -30,16 +30,13 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Regenerar Plataformas y Dependencias
+      - name: Instalar Dependencias de Flutter
         working-directory: ./mobile
-        run: |
-          flutter create . --platforms=android,ios --org bo.edu.grm --project-name colegio_grm_mobile
-          flutter pub get
+        run: flutter pub get
 
       - name: Compilar APK de Producción
         working-directory: ./mobile
-        run: |
-          flutter build apk --release --no-tree-shake-icons
+        run: flutter build apk --release --no-tree-shake-icons
 
       - name: Subir APK como Artefacto Descargable
         uses: actions/upload-artifact@v4
