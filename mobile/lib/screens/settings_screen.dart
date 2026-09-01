@@ -140,6 +140,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       label: Text(_isSyncing ? 'Sincronizando...' : 'Re-sincronizar Notificaciones Push'),
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        await FcmService.showNotification(
+                          id: 999,
+                          title: 'Colegio Gabriel René Moreno II',
+                          body: 'Prueba de alerta Push: Sistema activo y conectado.',
+                        );
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('¡Alerta enviada a la barra de notificaciones!'),
+                              backgroundColor: Color(0xFF0D5C3A),
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.notifications_active),
+                      label: const Text('Enviar Notificación de Prueba'),
+                    ),
+                  ),
                 ],
               ),
             ),
