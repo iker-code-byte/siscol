@@ -177,7 +177,7 @@ class _InboxScreenState extends State<InboxScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.between,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               'Historial de Alertas',
