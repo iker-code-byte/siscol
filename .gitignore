@@ -12,6 +12,8 @@ venv.bak/
 db.sqlite3
 db.sqlite3-journal
 *.log
+*firebase*service-account*.json
+firebase-service-account.json
 
 # Node & Frontend
 node_modules/

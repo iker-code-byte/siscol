@@ -152,6 +152,9 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # Notification & FCM Configuration
-NOTIFICATION_PROVIDER = os.environ.get('NOTIFICATION_PROVIDER', 'mock').lower()
-GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')
-FIREBASE_PROJECT_ID = os.environ.get('FIREBASE_PROJECT_ID', '')
+default_service_account = str(BASE_DIR / 'firebase-service-account.json')
+has_service_account = os.path.exists(default_service_account)
+
+NOTIFICATION_PROVIDER = os.environ.get('NOTIFICATION_PROVIDER', 'fcm' if has_service_account else 'mock').lower()
+GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', default_service_account if has_service_account else '')
+FIREBASE_PROJECT_ID = os.environ.get('FIREBASE_PROJECT_ID', 'siscol-364b3')
