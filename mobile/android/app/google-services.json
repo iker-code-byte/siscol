@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "123456789012",
-    "project_id": "colegio-grm-mvp",
-    "storage_bucket": "colegio-grm-mvp.appspot.com"
+    "project_number": "457752209571",
+    "project_id": "siscol-364b3",
+    "storage_bucket": "siscol-364b3.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:123456789012:android:abcdef1234567890",
+        "mobilesdk_app_id": "1:457752209571:android:4d391ee016cde984bcb716",
         "android_client_info": {
           "package_name": "bo.edu.grm.colegio_mobile"
         }
@@ -15,19 +15,12 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDummyApiKeyForFirebaseMobile2026"
+          "current_key": "AIzaSyCo6rgvfk5azfXa6ro983mPDIGyXg8T-rM"
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 1,
           "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 1
         }
       }
     }
