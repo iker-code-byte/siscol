@@ -20,6 +20,40 @@ class AcademicYear(models.Model):
     def __str__(self):
         return f"{self.name} ({'Activo' if self.active else 'Inactivo'})"
 
+class AcademicPeriodStatusChoices(models.TextChoices):
+    PLANNED = 'PLANNED', 'Planificado'
+    OPEN = 'OPEN', 'Abierto'
+    CLOSED = 'CLOSED', 'Cerrado'
+
+class AcademicPeriod(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='periods')
+    name = models.CharField(max_length=100) # e.g. "Primer Bimestre", "Segundo Bimestre"
+    period_type = models.CharField(max_length=20, default='BIMONTH')
+    number = models.PositiveSmallIntegerField() # 1, 2, 3, 4
+    start_date = models.DateField()
+    end_date = models.DateField()
+    grade_entry_start = models.DateField(null=True, blank=True)
+    grade_entry_end = models.DateField(null=True, blank=True)
+    status = models.CharField(
+        max_length=20, 
+        choices=AcademicPeriodStatusChoices.choices, 
+        default=AcademicPeriodStatusChoices.OPEN
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'academic_periods'
+        verbose_name = 'Periodo Académico'
+        verbose_name_plural = 'Periodos Académicos'
+        unique_together = ('academic_year', 'number')
+        ordering = ['academic_year', 'number']
+
+    def __str__(self):
+        return f"{self.name} ({self.academic_year.name}) - {self.get_status_display()}"
+
+
 class Course(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='courses')

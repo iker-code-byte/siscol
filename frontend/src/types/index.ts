@@ -138,6 +138,82 @@ export interface Grade {
   created_at?: string;
 }
 
+export interface AcademicPeriod {
+  id: string;
+  academic_year: string;
+  academic_year_name?: string;
+  name: string;
+  period_type: string;
+  number: number;
+  start_date: string;
+  end_date: string;
+  status: 'PLANNED' | 'OPEN' | 'CLOSED';
+  status_display?: string;
+}
+
+export type GradeActivityType = 'TASK' | 'EXAM' | 'PRACTICE' | 'PROJECT' | 'PRESENTATION' | 'PARTICIPATION' | 'OTHER';
+
+export interface GradeActivity {
+  id: string;
+  gradebook: string;
+  name: string;
+  description?: string;
+  activity_type: GradeActivityType;
+  activity_type_display?: string;
+  activity_date: string;
+  max_score: number | string;
+  weight?: number | string | null;
+  position: number;
+  is_active: boolean;
+  entries_count?: number;
+}
+
+export interface Gradebook {
+  id: string;
+  academic_year: string;
+  academic_year_name?: string;
+  academic_period: string;
+  academic_period_name?: string;
+  academic_period_number?: number;
+  course: string;
+  course_name?: string;
+  course_parallel?: string;
+  subject: string;
+  subject_name?: string;
+  subject_code?: string;
+  teacher: string;
+  teacher_name?: string;
+  status: 'OPEN' | 'CLOSED';
+  is_closed: boolean;
+  activities_count?: number;
+}
+
+export interface GradeMatrixStudent {
+  id: string;
+  code: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+}
+
+export interface GradeMatrixAverage {
+  average: number | null;
+  graded_count: number;
+  is_passing: boolean | null;
+}
+
+export interface GradeMatrixData {
+  gradebook: Gradebook;
+  is_closed: boolean;
+  students: GradeMatrixStudent[];
+  activities: GradeActivity[];
+  matrix: Record<string, Record<string, number | null>>;
+  averages: Record<string, GradeMatrixAverage>;
+  grading_scale_min: number;
+  grading_scale_max: number;
+}
+
+
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
 
 export interface Attendance {

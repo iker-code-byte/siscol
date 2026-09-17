@@ -5,25 +5,38 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/notification_model.dart';
 
 class ApiService {
-  // Default to Android Emulator loopback or local LAN. Can be modified in settings.
-  static String baseUrl = 'http://10.0.2.2:8000/api';
+  // Servidor de producción en la nube
+  static String baseUrl = 'https://siscol360.cloud/api';
 
   static const String keyDeviceToken = 'guardian_device_token';
   static const String keyBaseUrl = 'custom_base_url';
+
+  static String _normalizeUrl(String url) {
+    String clean = url.trim();
+    while (clean.endsWith('/')) {
+      clean = clean.substring(0, clean.length - 1);
+    }
+    if (!clean.endsWith('/api')) {
+      clean = '$clean/api';
+    }
+    return clean;
+  }
 
   static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     final customUrl = prefs.getString(keyBaseUrl);
     if (customUrl != null && customUrl.isNotEmpty) {
-      baseUrl = customUrl;
+      baseUrl = _normalizeUrl(customUrl);
     }
   }
 
   static Future<void> setBaseUrl(String url) async {
-    baseUrl = url;
+    final clean = _normalizeUrl(url);
+    baseUrl = clean;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(keyBaseUrl, url);
+    await prefs.setString(keyBaseUrl, clean);
   }
+
 
   static Future<String?> getDeviceToken() async {
     final prefs = await SharedPreferences.getInstance();

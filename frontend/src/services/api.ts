@@ -94,7 +94,52 @@ export const api = {
     return request<any>(`/teaching-assignments/${search ? `?${search}` : ''}`);
   },
 
-  // Grades
+  // Grades & Gradebook Excel Matrix
+  getAcademicPeriods: (academic_year_id?: string) => {
+    const q = academic_year_id ? `?academic_year_id=${academic_year_id}` : '';
+    return request<any>(`/academic-periods/${q}`);
+  },
+  getGradebooks: (params?: { academic_year_id?: string; academic_period_id?: string; course_id?: string; subject_id?: string }) => {
+    const search = new URLSearchParams(params as any).toString();
+    return request<any>(`/gradebooks/${search ? `?${search}` : ''}`);
+  },
+  getOrCreateGradebook: (payload: {
+    academic_year_id: string;
+    academic_period_id: string;
+    course_id: string;
+    subject_id: string;
+    teacher_id?: string;
+  }) =>
+    request<any>('/gradebooks/get-or-create/', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  getGradebookMatrix: (gradebookId: string) =>
+    request<any>(`/gradebooks/${gradebookId}/matrix/`),
+  createGradeActivity: (gradebookId: string, payload: any) =>
+    request<any>(`/gradebooks/${gradebookId}/activities/`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  updateGradeActivity: (activityId: string, payload: any) =>
+    request<any>(`/grade-activities/${activityId}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+  deleteGradeActivity: (activityId: string) =>
+    request<any>(`/grade-activities/${activityId}/`, {
+      method: 'DELETE',
+    }),
+  upsertGradeEntry: (payload: { activity_id: string; student_id: string; score: number | null }) =>
+    request<any>('/grade-entries/', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+  bulkUpsertGradebookMatrix: (gradebookId: string, entries: Array<{ activity_id: string; student_id: string; score: number | null }>) =>
+    request<any>(`/gradebooks/${gradebookId}/grades/bulk/`, {
+      method: 'PUT',
+      body: JSON.stringify({ entries }),
+    }),
   getGrades: (params?: { teaching_assignment_id?: string; term?: string; student_id?: string }) => {
     const search = new URLSearchParams(params as any).toString();
     return request<any>(`/grades/${search ? `?${search}` : ''}`);
@@ -108,6 +153,7 @@ export const api = {
     const q = params?.term ? `?term=${params.term}` : '';
     return request<{ student: any; results: any[] }>(`/me/grades/${q}`);
   },
+
 
   // Attendance
   getAttendance: (params?: { teaching_assignment_id?: string; date?: string }) => {

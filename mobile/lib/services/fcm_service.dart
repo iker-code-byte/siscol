@@ -169,14 +169,7 @@ class FcmService {
   static void startLivePolling() {
     _livePollTimer?.cancel();
     
-    // Pre-populate seen IDs on first launch
-    ApiService.getNotifications().then((list) {
-      for (var item in list) {
-        _seenNotificationIds.add(item.id);
-      }
-    }).catchError((_) {});
-
-    _livePollTimer = Timer.periodic(const Duration(seconds: 10), (timer) async {
+    Future<void> checkNewAlerts() async {
       final devToken = await ApiService.getDeviceToken();
       if (devToken == null) return;
 
@@ -195,8 +188,24 @@ class FcmService {
           }
         }
       } catch (_) {}
+    }
+
+    // Pre-populate seen IDs on first launch and check immediately
+    ApiService.getNotifications().then((list) {
+      for (var item in list) {
+        _seenNotificationIds.add(item.id);
+      }
+    }).catchError((_) {});
+
+    // Immediate check
+    checkNewAlerts();
+
+    // Fast polling cycle every 4 seconds for immediate responsiveness
+    _livePollTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      checkNewAlerts();
     });
   }
+
 
   static void stopLivePolling() {
     _livePollTimer?.cancel();

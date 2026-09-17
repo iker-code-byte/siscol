@@ -3,24 +3,22 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: grm_postgres
+    container_name: siscol_postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: colegio
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgrespassword
     volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - siscol_pgdata:/var/lib/postgresql/data
     networks:
-      - grm_network
+      - siscol_network
 
   backend:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
-    container_name: grm_backend
+    container_name: siscol_backend
     restart: unless-stopped
     command: >
       sh -c "python manage.py migrate &&
@@ -29,33 +27,32 @@ services:
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-django-insecure-prod-key-grm-2026}
       DJANGO_DEBUG: "false"
-      DJANGO_ALLOWED_HOSTS: "*"
+      DJANGO_ALLOWED_HOSTS: "siscol360.cloud,www.siscol360.cloud,localhost,127.0.0.1"
       DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/colegio
       NOTIFICATION_PROVIDER: ${NOTIFICATION_PROVIDER:-mock}
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/firebase-service-account.json
     depends_on:
       - postgres
-    ports:
-      - "8000:8000"
     networks:
-      - grm_network
+      - siscol_network
 
   frontend:
     build:
       context: .
       dockerfile: docker/Dockerfile.frontend
-    container_name: grm_frontend
+    container_name: siscol_frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "172.17.0.1:8090:80"
+      - "127.0.0.1:8090:80"
     depends_on:
       - backend
     networks:
-      - grm_network
+      - siscol_network
 
 volumes:
-  pgdata:
+  siscol_pgdata:
 
 networks:
-  grm_network:
+  siscol_network:
     driver: bridge

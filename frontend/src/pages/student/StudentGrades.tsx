@@ -79,7 +79,9 @@ export const StudentGrades: React.FC = () => {
               ) : (
                 grades.map((g) => {
                   const numScore = parseFloat(String(g.score));
-                  const isFailing = numScore < 51;
+                  const maxSc = parseFloat(String(g.max_score || 45));
+                  const percentage = maxSc > 0 ? (numScore / maxSc) * 100 : numScore;
+                  const isFailing = percentage < 51;
 
                   return (
                     <tr key={g.id} className="hover:bg-slate-50/60 transition-colors">

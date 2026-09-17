@@ -67,7 +67,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
           controller: serverController,
           decoration: const InputDecoration(
             labelText: 'URL de la API',
-            hintText: 'http://192.168.1.100:8000/api',
+            hintText: 'https://siscol360.cloud/api',
             border: OutlineInputBorder(),
           ),
         ),

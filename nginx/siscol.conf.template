@@ -1,0 +1,59 @@
+# =============================================================================
+# siscol360.cloud - VirtualHost del Sistema Escolar (SISCOL)
+# =============================================================================
+
+upstream siscol_frontend_upstream {
+    server 172.17.0.1:8090 max_fails=3 fail_timeout=10s;
+    keepalive 16;
+}
+
+# -----------------------------------------------------------------------------
+# 1) HTTP (Puerto 80): Desafíos ACME y redirección a HTTPS
+# -----------------------------------------------------------------------------
+server {
+    listen 80;
+    server_name siscol360.cloud www.siscol360.cloud;
+
+    # Webroot compartido de Certbot
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        default_type "text/plain";
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# -----------------------------------------------------------------------------
+# 2) HTTPS (Puerto 443): SSL Let's Encrypt y Proxy a SISCOL
+# -----------------------------------------------------------------------------
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name siscol360.cloud www.siscol360.cloud;
+
+    ssl_certificate /etc/nginx/certs/live/siscol360.cloud/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/live/siscol360.cloud/privkey.pem;
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        default_type "text/plain";
+    }
+
+    location / {
+        proxy_pass http://siscol_frontend_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # Timeouts amplios para operaciones de auditoría o subida de reportes
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}

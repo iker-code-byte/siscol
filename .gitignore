@@ -43,5 +43,8 @@ mobile/.flutter-plugins-dependencies
 .idea/
 *.swp
 *.swo
-.DS_Store
-Thumbs.db
+# Binaries & Archives
+cloudflared.exe
+*.zip
+.gradle/
+mobile/android/.gradle/
