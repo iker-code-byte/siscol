@@ -89,24 +89,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 flex items-center px-6 border-b border-slate-800/80 bg-slate-950/40 gap-3">
-          <div className="w-9 h-9 rounded-xl bg-brand-500/20 border border-brand-500/40 flex items-center justify-center text-brand-400 font-bold">
-            GRM
-          </div>
-          <div>
-            <h1 className="text-sm font-bold tracking-tight text-white leading-tight">Gabriel René Moreno II</h1>
-            <p className="text-[10px] text-brand-400 font-medium tracking-wider uppercase">Comarapa, Bolivia</p>
+        <div className="h-16 flex items-center px-4 border-b border-slate-800/80 bg-slate-950/40 gap-3">
+          <img
+            src="/marista-logo.png"
+            alt="Escudo Marista"
+            className="w-10 h-10 object-contain drop-shadow-sm shrink-0"
+          />
+          <div className="overflow-hidden">
+            <h1 className="text-xs font-bold tracking-tight text-white leading-tight truncate">
+              U.E. Gabriel René Moreno II
+            </h1>
+            <p className="text-[10px] text-amber-400 font-semibold tracking-wide uppercase truncate">
+              Fe y Alegría Marista
+            </p>
           </div>
         </div>
 
         {/* User Info Capsule */}
         <div className="px-4 py-3 mx-3 my-3 bg-slate-800/50 rounded-xl border border-slate-700/50 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center font-bold text-xs text-white">
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-xs text-white">
             {user?.username.charAt(0).toUpperCase()}
           </div>
           <div className="overflow-hidden">
             <p className="text-xs font-semibold text-slate-200 truncate">{user?.profile?.full_name || user?.username}</p>
-            <p className="text-[10px] text-brand-400 font-medium tracking-wide capitalize">
+            <p className="text-[10px] text-blue-400 font-medium tracking-wide capitalize">
               {user?.role === 'ADMIN' ? 'Administrador' : user?.role === 'TEACHER' ? 'Docente' : 'Estudiante'}
             </p>
           </div>
@@ -123,7 +129,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
                   isActive
-                    ? 'bg-brand-600 text-white shadow-sm font-semibold'
+                    ? 'bg-blue-600 text-white shadow-sm font-semibold'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
                 }`
               }

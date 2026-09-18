@@ -40,16 +40,25 @@ export const GuardianActivate: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-96 h-96 bg-brand-500/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center z-10">
         <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white mb-6 transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" /> Volver al portal
         </Link>
-        <div className="w-14 h-14 rounded-2xl bg-brand-500/20 border border-brand-500/40 flex items-center justify-center text-brand-400 mx-auto mb-3">
-          <Smartphone className="w-7 h-7" />
+        <div className="mx-auto mb-3 flex justify-center">
+          <img
+            src="/marista-logo.png"
+            alt="Escudo Marista"
+            className="w-16 h-16 object-contain drop-shadow-md"
+          />
         </div>
-        <h2 className="text-2xl font-extrabold tracking-tight text-white">Vincular Dispositivo de Tutor</h2>
+        <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white leading-tight">
+          Vincular Dispositivo de Tutor
+        </h2>
+        <p className="mt-1 text-xs font-semibold text-amber-400 tracking-wider uppercase">
+          U.E. Gabriel René Moreno II — Fe y Alegría Marista
+        </p>
         <p className="mt-1 text-xs text-slate-300 max-w-sm mx-auto">
           Ingrese el código de activación otorgado por la dirección del colegio para recibir avisos y alertas en este teléfono.
         </p>
@@ -76,8 +85,8 @@ export const GuardianActivate: React.FC = () => {
                   required
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  placeholder="ej. GRM-889613"
-                  className="block w-full pl-10 pr-3.5 py-3 bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-base font-mono tracking-wider uppercase focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-center font-bold"
+                  placeholder="ej. GRM-XXXXXX"
+                  className="block w-full pl-10 pr-3.5 py-3 bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-base font-mono tracking-wider uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center font-bold"
                 />
               </div>
               <p className="text-[11px] text-slate-400 mt-1.5">Código de 6 u 8 caracteres generado por el colegio.</p>
@@ -89,12 +98,12 @@ export const GuardianActivate: React.FC = () => {
                 type="text"
                 value={deviceName}
                 onChange={(e) => setDeviceName(e.target.value)}
-                placeholder="ej. Teléfono de Mamá"
-                className="block w-full px-3.5 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                placeholder="ej. Samsung de Mamá o iPhone Personal"
+                className="block w-full px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
-            <Button type="submit" variant="primary" size="lg" className="w-full mt-2" isLoading={isLoading}>
+            <Button type="submit" variant="primary" size="lg" className="w-full mt-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold border-none shadow-lg shadow-amber-500/20" isLoading={isLoading}>
               Vincular Dispositivo
             </Button>
           </form>

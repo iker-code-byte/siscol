@@ -18,9 +18,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-full border border-brand-100">
-          <Shield className="w-3.5 h-3.5" />
-          Colegio Gabriel René Moreno II — MVP v2
+        <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-100 shadow-2xs">
+          <Shield className="w-3.5 h-3.5 text-amber-500" />
+          U.E. Gabriel René Moreno II — Fe y Alegría Marista
         </span>
       </div>
 
