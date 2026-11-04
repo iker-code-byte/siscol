@@ -83,8 +83,14 @@ export const api = {
     const q = params?.course_id ? `?course_id=${params.course_id}` : '';
     return request<any>(`/students/${q}`);
   },
-  getGuardians: () => request<any>('/guardians/'),
-  getStudentGuardians: () => request<any>('/student-guardians/'),
+  getGuardians: (params?: { course_id?: string }) => {
+    const q = params?.course_id ? `?course_id=${params.course_id}` : '';
+    return request<any>(`/guardians/${q}`);
+  },
+  getStudentGuardians: (params?: { course_id?: string }) => {
+    const q = params?.course_id ? `?course_id=${params.course_id}` : '';
+    return request<any>(`/student-guardians/${q}`);
+  },
   getEnrollments: (params?: { course_id?: string; academic_year_id?: string }) => {
     const search = new URLSearchParams(params as any).toString();
     return request<any>(`/enrollments/${search ? `?${search}` : ''}`);

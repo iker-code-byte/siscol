@@ -1,3 +1,4 @@
+from django.db.models import Count, Prefetch, Q
 from rest_framework import viewsets, permissions
 from apps.accounts.permissions import IsAdminRole, IsTeacherRole, IsAdminOrTeacher
 from .models import (
@@ -14,11 +15,15 @@ class AcademicYearViewSet(viewsets.ModelViewSet):
     queryset = AcademicYear.objects.all().order_by('-start_date')
     serializer_class = AcademicYearSerializer
     permission_classes = [IsAdminOrTeacher]
+    pagination_class = None
 
 class CourseViewSet(viewsets.ModelViewSet):
-    queryset = Course.objects.all().select_related('academic_year').order_by('name', 'parallel')
+    queryset = Course.objects.all().select_related('academic_year').annotate(
+        active_students_count=Count('enrollments', filter=Q(enrollments__status='ACTIVE'))
+    ).order_by('name', 'parallel')
     serializer_class = CourseSerializer
     permission_classes = [IsAdminOrTeacher]
+    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -31,16 +36,26 @@ class SubjectViewSet(viewsets.ModelViewSet):
     queryset = Subject.objects.all().order_by('name')
     serializer_class = SubjectSerializer
     permission_classes = [IsAdminOrTeacher]
+    pagination_class = None
 
 class TeacherViewSet(viewsets.ModelViewSet):
     queryset = Teacher.objects.all().select_related('user').order_by('last_name', 'first_name')
     serializer_class = TeacherSerializer
     permission_classes = [IsAdminRole]
+    pagination_class = None
 
 class StudentViewSet(viewsets.ModelViewSet):
-    queryset = Student.objects.all().select_related('user').prefetch_related('guardian_links__guardian').order_by('last_name', 'first_name')
+    queryset = Student.objects.all().select_related('user').prefetch_related(
+        'guardian_links__guardian',
+        Prefetch(
+            'enrollments',
+            queryset=Enrollment.objects.filter(status='ACTIVE').select_related('course'),
+            to_attr='prefetched_enrollments'
+        )
+    ).order_by('last_name', 'first_name')
     serializer_class = StudentSerializer
     permission_classes = [IsAdminOrTeacher]
+    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -50,19 +65,56 @@ class StudentViewSet(viewsets.ModelViewSet):
         return qs
 
 class GuardianViewSet(viewsets.ModelViewSet):
-    queryset = Guardian.objects.all().prefetch_related('student_links').order_by('full_name')
+    queryset = Guardian.objects.all().prefetch_related(
+        Prefetch(
+            'student_links',
+            queryset=StudentGuardian.objects.select_related('student').prefetch_related(
+                Prefetch(
+                    'student__enrollments',
+                    queryset=Enrollment.objects.filter(status='ACTIVE').select_related('course'),
+                    to_attr='prefetched_enrollments'
+                )
+            )
+        )
+    ).order_by('full_name')
     serializer_class = GuardianSerializer
     permission_classes = [IsAdminRole]
+    pagination_class = None
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        course_id = self.request.query_params.get('course_id')
+        if course_id:
+            qs = qs.filter(
+                student_links__student__enrollments__course_id=course_id,
+                student_links__student__enrollments__status='ACTIVE'
+            ).distinct()
+        return qs
 
 class StudentGuardianViewSet(viewsets.ModelViewSet):
-    queryset = StudentGuardian.objects.all().select_related('student', 'guardian')
+    queryset = StudentGuardian.objects.all().select_related('student', 'guardian').prefetch_related(
+        Prefetch(
+            'student__enrollments',
+            queryset=Enrollment.objects.filter(status='ACTIVE').select_related('course'),
+            to_attr='prefetched_enrollments'
+        )
+    ).order_by('student__last_name', 'student__first_name')
     serializer_class = StudentGuardianSerializer
     permission_classes = [IsAdminRole]
+    pagination_class = None
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        course_id = self.request.query_params.get('course_id')
+        if course_id:
+            qs = qs.filter(student__enrollments__course_id=course_id, student__enrollments__status='ACTIVE')
+        return qs
 
 class EnrollmentViewSet(viewsets.ModelViewSet):
     queryset = Enrollment.objects.all().select_related('student', 'course', 'academic_year').order_by('student__last_name')
     serializer_class = EnrollmentSerializer
     permission_classes = [IsAdminOrTeacher]
+    pagination_class = None
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -76,6 +128,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
 
 class TeachingAssignmentViewSet(viewsets.ModelViewSet):
     serializer_class = TeachingAssignmentSerializer
+    pagination_class = None
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:

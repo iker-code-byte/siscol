@@ -44,10 +44,15 @@ export const AdminCourses: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Cursos y Paralelos */}
         <div className="space-y-4">
-          <h3 className="text-base font-bold text-slate-800 tracking-tight flex items-center gap-2">
-            <School className="w-4 h-4 text-brand-600" />
-            Cursos y Paralelos
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-bold text-slate-800 tracking-tight flex items-center gap-2">
+              <School className="w-4 h-4 text-brand-600" />
+              Cursos y Paralelos ({courses.length})
+            </h3>
+            <span className="text-xs font-semibold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-lg">
+              Total: {courses.reduce((acc, c) => acc + (c.students_count || 0), 0)} estudiantes
+            </span>
+          </div>
 
           <Card className="p-0 overflow-hidden">
             <table className="w-full text-left text-xs">
@@ -56,6 +61,7 @@ export const AdminCourses: React.FC = () => {
                   <th className="px-6 py-3.5">Año / Gestión</th>
                   <th className="px-6 py-3.5">Nombre del Curso</th>
                   <th className="px-6 py-3.5 text-center">Paralelo</th>
+                  <th className="px-6 py-3.5 text-right">Estudiantes</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -67,6 +73,9 @@ export const AdminCourses: React.FC = () => {
                       <span className="px-2.5 py-1 bg-brand-50 text-brand-800 rounded-lg font-bold">
                         {c.parallel}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-right font-semibold text-slate-700">
+                      {c.students_count ?? 0} alumnos
                     </td>
                   </tr>
                 ))}

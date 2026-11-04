@@ -1,5 +1,6 @@
 from decimal import Decimal
 from datetime import date, timedelta
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -424,4 +425,8 @@ class Command(BaseCommand):
         self.stdout.write(f"[Tutor Demo Principal]  María Gómez de Pérez (Madre de Juan Pérez)")
         self.stdout.write(self.style.NOTICE(f"[CÓDIGO ACTIVACIÓN TELÉFONO]: {plain_code}"))
         self.stdout.write(self.style.SUCCESS("="*70 + "\n"))
+
+        # Importar los datos reales de cursos, paralelos, estudiantes y padres del Excel BJP
+        call_command('import_excel_bjp')
+
 

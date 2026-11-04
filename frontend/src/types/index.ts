@@ -36,6 +36,7 @@ export interface Course {
   academic_year_name?: string;
   name: string;
   parallel: string;
+  students_count?: number;
 }
 
 export interface Subject {
@@ -65,8 +66,23 @@ export interface Student {
   first_name: string;
   last_name: string;
   full_name: string;
+  course_id?: string | null;
+  course_name?: string | null;
+  course_parallel?: string | null;
   active: boolean;
   guardians?: StudentGuardian[];
+}
+
+export interface GuardianStudentDetail {
+  link_id: string;
+  student_id: string;
+  student_code: string;
+  student_name: string;
+  relationship: 'MOTHER' | 'FATHER' | 'TUTOR' | 'OTHER';
+  relationship_display?: string;
+  course_id?: string | null;
+  course_name?: string | null;
+  course_parallel?: string | null;
 }
 
 export interface Guardian {
@@ -77,16 +93,22 @@ export interface Guardian {
   notifications_enabled: boolean;
   active: boolean;
   students_count?: number;
+  students_details?: GuardianStudentDetail[];
 }
 
 export interface StudentGuardian {
   id: string;
   student: string;
   student_name?: string;
+  student_code?: string;
   guardian: string;
   guardian_name?: string;
   guardian_phone?: string;
   relationship: 'MOTHER' | 'FATHER' | 'TUTOR' | 'OTHER';
+  relationship_display?: string;
+  course_id?: string | null;
+  course_name?: string | null;
+  course_parallel?: string | null;
   is_primary: boolean;
   can_receive_notifications: boolean;
 }
