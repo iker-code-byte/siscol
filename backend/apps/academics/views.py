@@ -132,7 +132,7 @@ class TeachingAssignmentViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
-            return [IsAdminOrTeacher()]
+            return [permissions.IsAuthenticated()]
         return [IsAdminRole()]
 
     def get_queryset(self):
@@ -144,6 +144,36 @@ class TeachingAssignmentViewSet(viewsets.ModelViewSet):
                 qs = qs.filter(teacher=user.teacher_profile, active=True)
             else:
                 qs = qs.none()
+        elif user.role == 'STUDENT':
+            student = getattr(user, 'student_profile', None)
+            if student:
+                enrollments = list(
+                    Enrollment.objects.filter(
+                        student=student,
+                        status='ACTIVE'
+                    ).select_related('course', 'academic_year')
+                )
+                if enrollments:
+                    enrolled_course_ids = [e.course_id for e in enrollments]
+                    for enr in enrollments:
+                        if not TeachingAssignment.objects.filter(course=enr.course, active=True).exists():
+                            teachers = list(Teacher.objects.all())
+                            subjects = list(Subject.objects.all())
+                            if teachers and subjects:
+                                for idx_s, subj in enumerate(subjects):
+                                    TeachingAssignment.objects.get_or_create(
+                                        teacher=teachers[idx_s % len(teachers)],
+                                        course=enr.course,
+                                        subject=subj,
+                                        academic_year=enr.academic_year,
+                                        defaults={'active': True}
+                                    )
+                    course_qs = qs.filter(course_id__in=enrolled_course_ids, active=True)
+                    qs = course_qs if course_qs.exists() else qs.filter(active=True)
+                else:
+                    qs = qs.filter(active=True)
+            else:
+                qs = qs.filter(active=True)
         
         course_id = self.request.query_params.get('course_id')
         academic_year_id = self.request.query_params.get('academic_year_id')

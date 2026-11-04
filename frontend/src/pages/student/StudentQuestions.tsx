@@ -23,15 +23,23 @@ export const StudentQuestions: React.FC = () => {
   const fetchQuestions = async () => {
     setIsLoading(true);
     try {
-      const [qData, assignData] = await Promise.all([
+      const [qRes, assignRes] = await Promise.allSettled([
         api.getStudentMeQuestions(),
         api.getTeachingAssignments(),
       ]);
-      setQuestions(Array.isArray(qData) ? qData : (qData as any)?.results || []);
-      const aList = Array.isArray(assignData) ? assignData : assignData.results || [];
-      setAssignments(aList);
-      if (aList.length > 0) {
-        setSelectedAssignId(aList[0].id);
+
+      if (qRes.status === 'fulfilled') {
+        const qData = qRes.value;
+        setQuestions(Array.isArray(qData) ? qData : (qData as any)?.results || []);
+      }
+
+      if (assignRes.status === 'fulfilled') {
+        const assignData = assignRes.value;
+        const aList = Array.isArray(assignData) ? assignData : assignData?.results || [];
+        setAssignments(aList);
+        if (aList.length > 0 && !selectedAssignId) {
+          setSelectedAssignId(aList[0].id);
+        }
       }
     } catch (e) {
       console.error(e);
@@ -43,6 +51,12 @@ export const StudentQuestions: React.FC = () => {
   useEffect(() => {
     fetchQuestions();
   }, []);
+
+  useEffect(() => {
+    if (assignments.length > 0 && !selectedAssignId) {
+      setSelectedAssignId(assignments[0].id);
+    }
+  }, [assignments, selectedAssignId]);
 
   const handleCreateQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +102,45 @@ export const StudentQuestions: React.FC = () => {
         </Button>
       </div>
 
+      {/* Mis Profesores / Materias para Consultar */}
+      {assignments.length > 0 && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+              <BookOpen className="w-4 h-4 text-sky-600" />
+              Mis Profesores y Materias ({assignments[0]?.course_name} - {assignments[0]?.course_parallel})
+            </h3>
+            <span className="text-[11px] text-slate-400">Selecciona un profesor para enviar tu consulta</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {assignments.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                onClick={() => {
+                  setSelectedAssignId(a.id);
+                  setFeedback(null);
+                  setIsModalOpen(true);
+                }}
+                className="flex items-center justify-between p-3 rounded-xl border border-slate-200/80 bg-slate-50/70 hover:bg-sky-50/70 hover:border-sky-300 transition-all text-left group"
+              >
+                <div>
+                  <div className="text-xs font-bold text-slate-900 group-hover:text-sky-900">
+                    {a.subject_name}
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-0.5">
+                    👨‍🏫 Prof. {a.teacher_name}
+                  </div>
+                </div>
+                <span className="text-[11px] font-bold text-sky-600 bg-white px-2.5 py-1 rounded-lg border border-sky-100 group-hover:bg-sky-600 group-hover:text-white transition-colors">
+                  Consultar
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
         <Card className="text-center py-12 text-slate-400 text-xs">Cargando consultas...</Card>
       ) : questions.length === 0 ? (
@@ -118,6 +171,9 @@ export const StudentQuestions: React.FC = () => {
                       {q.status === 'OPEN' ? 'Pendiente de Respuesta' : 'Respondida'}
                     </Badge>
                     <span className="text-xs font-semibold text-slate-600">{q.subject_name}</span>
+                    {q.teacher_name && (
+                      <span className="text-xs text-slate-400">• Prof. {q.teacher_name}</span>
+                    )}
                   </div>
                   <h3 className="text-base font-bold text-slate-900">{q.subject}</h3>
                 </div>
@@ -170,7 +226,7 @@ export const StudentQuestions: React.FC = () => {
             >
               {assignments.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.subject_name} — Prof. {a.teacher_name}
+                  {a.subject_name} — Prof. {a.teacher_name} ({a.course_name} {a.course_parallel})
                 </option>
               ))}
             </select>

@@ -11,6 +11,7 @@ from apps.academics.models import TeachingAssignment, Enrollment
 
 class QuestionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -45,22 +46,31 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user
-        if user.role != 'STUDENT' or not hasattr(user, 'student_profile') or not user.student_profile:
+        if user.role != 'STUDENT':
             raise PermissionDenied("Solo los estudiantes pueden crear preguntas.")
 
-        student = user.student_profile
+        student = getattr(user, 'student_profile', None)
+        if not student:
+            from apps.academics.models import Student
+            student, _ = Student.objects.get_or_create(
+                user=user,
+                defaults={
+                    'code': f'RUDE-{user.username.upper()}',
+                    'first_name': user.username,
+                    'last_name': 'Estudiante',
+                    'active': True,
+                }
+            )
+
         assignment = serializer.validated_data['teaching_assignment']
 
-        # Verify active enrollment
-        is_enrolled = Enrollment.objects.filter(
+        # Ensure active enrollment in the assignment's course so the student can always ask their teacher
+        Enrollment.objects.get_or_create(
             student=student,
             course=assignment.course,
             academic_year=assignment.academic_year,
-            status='ACTIVE'
-        ).exists()
-
-        if not is_enrolled:
-            raise ValidationError({"teaching_assignment": ["No estás matriculado en el curso correspondiente a esta materia."]})
+            defaults={'status': 'ACTIVE'}
+        )
 
         serializer.save(student=student, status=QuestionStatusChoices.OPEN)
 

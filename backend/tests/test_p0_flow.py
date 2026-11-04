@@ -282,3 +282,20 @@ class GuardianActivationAndDeviceTests(BaseP0TestCase):
         # Access inbox with device auth
         inbox_resp = client.get('/api/guardian/notifications/')
         self.assertEqual(inbox_resp.status_code, status.HTTP_200_OK)
+
+    def test_student_can_list_teachers_and_ask_question(self):
+        client = APIClient()
+        client.force_authenticate(user=self.student1_user)
+
+        assign_resp = client.get('/api/teaching-assignments/')
+        self.assertEqual(assign_resp.status_code, status.HTTP_200_OK)
+        assignments = assign_resp.data if isinstance(assign_resp.data, list) else assign_resp.data.get('results', [])
+        self.assertEqual(len(assignments), 2)
+
+        q_resp = client.post('/api/questions/', {
+            'teaching_assignment': assignments[0]['id'],
+            'subject': 'Duda sobre ecuaciones',
+            'body': '¿Cómo se despeja x en el ejercicio 3?'
+        }, format='json')
+        self.assertEqual(q_resp.status_code, status.HTTP_201_CREATED)
+
