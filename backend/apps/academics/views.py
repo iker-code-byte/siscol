@@ -183,3 +183,40 @@ class TeachingAssignmentViewSet(viewsets.ModelViewSet):
             qs = qs.filter(academic_year_id=academic_year_id)
             
         return qs.order_by('course__name', 'course__parallel', 'subject__name')
+
+
+from pathlib import Path
+import tempfile
+from django.core.management import call_command
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+
+
+class ImportBjpExcelView(APIView):
+    permission_classes = [IsAdminRole]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def post(self, request):
+        uploaded_file = request.FILES.get('file')
+        if uploaded_file:
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp:
+                for chunk in uploaded_file.chunks():
+                    tmp.write(chunk)
+                tmp_path = Path(tmp.name)
+            try:
+                call_command('import_excel_bjp', excel=str(tmp_path))
+            finally:
+                if tmp_path.exists():
+                    tmp_path.unlink()
+        else:
+            call_command('import_excel_bjp')
+
+        return Response({
+            'message': 'Cursos, paralelos, estudiantes y padres de familia importados correctamente.',
+            'courses_count': Course.objects.count(),
+            'students_count': Student.objects.count(),
+            'guardians_count': Guardian.objects.count(),
+            'links_count': StudentGuardian.objects.count(),
+        })
+

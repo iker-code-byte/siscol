@@ -3,7 +3,8 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     AcademicYearViewSet, CourseViewSet, SubjectViewSet, 
     TeacherViewSet, StudentViewSet, GuardianViewSet, 
-    StudentGuardianViewSet, EnrollmentViewSet, TeachingAssignmentViewSet
+    StudentGuardianViewSet, EnrollmentViewSet, TeachingAssignmentViewSet,
+    ImportBjpExcelView
 )
 
 router = DefaultRouter()
@@ -18,5 +19,6 @@ router.register(r'enrollments', EnrollmentViewSet, basename='enrollment')
 router.register(r'teaching-assignments', TeachingAssignmentViewSet, basename='teaching-assignment')
 
 urlpatterns = [
+    path('import-bjp-excel/', ImportBjpExcelView.as_view(), name='import-bjp-excel'),
     path('', include(router.urls)),
 ]
