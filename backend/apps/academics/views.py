@@ -126,6 +126,57 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
             qs = qs.filter(academic_year_id=academic_year_id)
         return qs
 
+def ensure_student_profile_and_assignments(user):
+    """Ensure a STUDENT user always has a linked Student profile, active Enrollment, and course TeachingAssignments."""
+    student = getattr(user, 'student_profile', None)
+    if not student:
+        student = Student.objects.filter(user__isnull=True, active=True).order_by('last_name', 'first_name').first()
+        if student:
+            student.user = user
+            student.save(update_fields=['user'])
+        else:
+            student, _ = Student.objects.get_or_create(
+                user=user,
+                defaults={
+                    'code': f'RUDE-{user.username.upper()}',
+                    'first_name': user.username,
+                    'last_name': 'Estudiante',
+                    'active': True,
+                }
+            )
+
+    enrollments = list(
+        Enrollment.objects.filter(
+            student=student,
+            status='ACTIVE'
+        ).select_related('course', 'academic_year')
+    )
+    if not enrollments:
+        first_course = Course.objects.select_related('academic_year').order_by('name', 'parallel').first()
+        if first_course:
+            enr, _ = Enrollment.objects.get_or_create(
+                student=student,
+                academic_year=first_course.academic_year,
+                defaults={'course': first_course, 'status': 'ACTIVE'}
+            )
+            enrollments = [enr]
+
+    for enr in enrollments:
+        if not TeachingAssignment.objects.filter(course=enr.course, active=True).exists():
+            teachers = list(Teacher.objects.all())
+            subjects = list(Subject.objects.all())
+            if teachers and subjects:
+                for idx_s, subj in enumerate(subjects):
+                    TeachingAssignment.objects.get_or_create(
+                        teacher=teachers[idx_s % len(teachers)],
+                        course=enr.course,
+                        subject=subj,
+                        academic_year=enr.academic_year,
+                        defaults={'active': True}
+                    )
+    return student, enrollments
+
+
 class TeachingAssignmentViewSet(viewsets.ModelViewSet):
     serializer_class = TeachingAssignmentSerializer
     pagination_class = None
@@ -145,33 +196,11 @@ class TeachingAssignmentViewSet(viewsets.ModelViewSet):
             else:
                 qs = qs.none()
         elif user.role == 'STUDENT':
-            student = getattr(user, 'student_profile', None)
-            if student:
-                enrollments = list(
-                    Enrollment.objects.filter(
-                        student=student,
-                        status='ACTIVE'
-                    ).select_related('course', 'academic_year')
-                )
-                if enrollments:
-                    enrolled_course_ids = [e.course_id for e in enrollments]
-                    for enr in enrollments:
-                        if not TeachingAssignment.objects.filter(course=enr.course, active=True).exists():
-                            teachers = list(Teacher.objects.all())
-                            subjects = list(Subject.objects.all())
-                            if teachers and subjects:
-                                for idx_s, subj in enumerate(subjects):
-                                    TeachingAssignment.objects.get_or_create(
-                                        teacher=teachers[idx_s % len(teachers)],
-                                        course=enr.course,
-                                        subject=subj,
-                                        academic_year=enr.academic_year,
-                                        defaults={'active': True}
-                                    )
-                    course_qs = qs.filter(course_id__in=enrolled_course_ids, active=True)
-                    qs = course_qs if course_qs.exists() else qs.filter(active=True)
-                else:
-                    qs = qs.filter(active=True)
+            _, enrollments = ensure_student_profile_and_assignments(user)
+            if enrollments:
+                enrolled_course_ids = [e.course_id for e in enrollments]
+                course_qs = qs.filter(course_id__in=enrolled_course_ids, active=True)
+                qs = course_qs if course_qs.exists() else qs.filter(active=True)
             else:
                 qs = qs.filter(active=True)
         

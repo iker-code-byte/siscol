@@ -8,6 +8,7 @@ from apps.accounts.permissions import IsStudentRole
 from .models import Question, Answer, QuestionStatusChoices
 from .serializers import QuestionSerializer, QuestionCreateSerializer, AnswerSerializer
 from apps.academics.models import TeachingAssignment, Enrollment
+from apps.academics.views import ensure_student_profile_and_assignments
 
 class QuestionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -33,10 +34,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
             else:
                 return qs.none()
         elif user.role == 'STUDENT':
-            if hasattr(user, 'student_profile'):
-                qs = qs.filter(student=user.student_profile)
-            else:
-                return qs.none()
+            student, _ = ensure_student_profile_and_assignments(user)
+            qs = qs.filter(student=student)
 
         status_param = self.request.query_params.get('status')
         if status_param:
@@ -108,10 +107,7 @@ class StudentMeQuestionsView(APIView):
 
     def get(self, request):
         user = request.user
-        if not hasattr(user, 'student_profile') or not user.student_profile:
-            raise NotFound("No se encontró un perfil de estudiante vinculado a esta cuenta.")
-
-        student = user.student_profile
+        student, _ = ensure_student_profile_and_assignments(user)
         questions = Question.objects.filter(student=student).select_related(
             'teaching_assignment__course',
             'teaching_assignment__subject',

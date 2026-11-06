@@ -433,12 +433,8 @@ class Command(BaseCommand):
         # 2. Import into Django Database
         with transaction.atomic():
             if options['clean_demo']:
-                # Remove demo students RUDE-8072* and demo guardians
-                demo_students = Student.objects.filter(code__startswith='RUDE-8072')
-                demo_user_ids = list(demo_students.exclude(user=None).values_list('user_id', flat=True))
-                demo_students.delete()
-                if demo_user_ids:
-                    User.objects.filter(id__in=demo_user_ids).delete()
+                # Remove demo students RUDE-8072* and demo guardians (keep estudiante1..12 users to re-link)
+                Student.objects.filter(code__startswith='RUDE-8072').delete()
                 Guardian.objects.filter(
                     full_name__in=[
                         'María Gómez de Pérez',
@@ -503,7 +499,7 @@ class Command(BaseCommand):
             created_guardians = 0
             created_links = 0
 
-            for rec in records:
+            for rec_idx, rec in enumerate(records):
                 rude = rec['rude']
                 username = f"est_{rude}"
                 st_user = existing_users.get(username)
@@ -517,10 +513,26 @@ class Command(BaseCommand):
                     )
                     existing_users[username] = st_user
 
+                if rec_idx < 12:
+                    demo_uname = f"estudiante{rec_idx + 1}"
+                    demo_user = existing_users.get(demo_uname)
+                    if not demo_user:
+                        demo_user = User.objects.create(
+                            username=demo_uname,
+                            email=f"{demo_uname}@colegio-grm.edu.bo",
+                            role=RoleChoices.STUDENT,
+                            is_active=True,
+                            password=default_student_pw,
+                        )
+                        existing_users[demo_uname] = demo_user
+                    linked_user = demo_user
+                else:
+                    linked_user = st_user
+
                 student = existing_students.get(rude)
                 if not student:
                     student = Student.objects.create(
-                        user=st_user,
+                        user=linked_user,
                         code=rude,
                         first_name=rec['nombres'],
                         last_name=rec['apellidos'],
@@ -531,7 +543,7 @@ class Command(BaseCommand):
                 else:
                     student.first_name = rec['nombres']
                     student.last_name = rec['apellidos']
-                    student.user = st_user
+                    student.user = linked_user
                     student.active = True
                     student.save(update_fields=['first_name', 'last_name', 'user', 'active'])
 

@@ -258,11 +258,9 @@ class StudentMeGradesView(APIView):
     permission_classes = [IsStudentRole]
 
     def get(self, request):
+        from apps.academics.views import ensure_student_profile_and_assignments
         user = request.user
-        if not hasattr(user, 'student_profile') or not user.student_profile:
-            raise NotFound("No se encontró un perfil de estudiante vinculado a esta cuenta.")
-
-        student = user.student_profile
+        student, _ = ensure_student_profile_and_assignments(user)
         grades = Grade.objects.filter(student=student).select_related(
             'teaching_assignment__course',
             'teaching_assignment__subject',
