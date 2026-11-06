@@ -583,20 +583,59 @@ class Command(BaseCommand):
                 if link_created:
                     created_links += 1
 
-            # Also ensure existing teachers are assigned to all 20 courses so gradebooks/attendance work across all courses
-            teachers = list(Teacher.objects.all())
-            subjects = list(Subject.objects.all())
-            if teachers and subjects:
-                for course_obj in courses_by_key.values():
-                    for idx_s, subj in enumerate(subjects):
-                        prof = teachers[idx_s % len(teachers)]
-                        TeachingAssignment.objects.get_or_create(
-                            teacher=prof,
-                            course=course_obj,
-                            subject=subj,
-                            academic_year=year_2026,
-                            defaults={'active': True},
-                        )
+            # Ensure the 5 platform teachers and 5 subjects exist and are assigned cleanly to all 20 courses
+            teacher_subject_specs = [
+                ('docente1', 'Carlos', 'Mamani Rojas', '6284910-SC', 'MAT-101', 'Matemáticas'),
+                ('docente2', 'Elena', 'Morales Gutiérrez', '4918234-SC', 'LEN-101', 'Lenguaje y Literatura'),
+                ('docente3', 'Jorge', 'Salazar Peña', '5321890-SC', 'BIO-101', 'Ciencias Naturales y Biología'),
+                ('docente4', 'Patricia', 'Vaca Terrazas', '7104928-SC', 'SOC-101', 'Ciencias Sociales e Historia'),
+                ('docente5', 'Raúl', 'Flores Mendoza', '6592014-SC', 'FIS-101', 'Física y Química'),
+            ]
+            default_teacher_pw = make_password('docente123')
+            canonical_pairs = []
+            for t_uname, t_first, t_last, t_doc, s_code, s_name in teacher_subject_specs:
+                t_user = existing_users.get(t_uname)
+                if not t_user:
+                    t_user = User.objects.create(
+                        username=t_uname,
+                        email=f"{t_uname}@colegio-grm.edu.bo",
+                        role=RoleChoices.TEACHER,
+                        is_active=True,
+                        password=default_teacher_pw,
+                    )
+                    existing_users[t_uname] = t_user
+                prof, _ = Teacher.objects.get_or_create(
+                    document_number=t_doc,
+                    defaults={
+                        'user': t_user,
+                        'first_name': t_first,
+                        'last_name': t_last,
+                    }
+                )
+                subj, _ = Subject.objects.get_or_create(
+                    code=s_code,
+                    defaults={'name': s_name}
+                )
+                canonical_pairs.append((prof, subj))
+
+            for course_obj in courses_by_key.values():
+                for prof, subj in canonical_pairs:
+                    # Remove duplicate assignments for the same course+subject with a different teacher if unused
+                    extra_qs = TeachingAssignment.objects.filter(
+                        course=course_obj,
+                        subject=subj,
+                        academic_year=year_2026
+                    ).exclude(teacher=prof)
+                    for extra in extra_qs:
+                        if not extra.questions.exists() and not extra.grades.exists() and not extra.attendances.exists():
+                            extra.delete()
+                    TeachingAssignment.objects.get_or_create(
+                        teacher=prof,
+                        course=course_obj,
+                        subject=subj,
+                        academic_year=year_2026,
+                        defaults={'active': True},
+                    )
 
         self.stdout.write(self.style.SUCCESS(
             f"\nImportación completada con éxito en la base de datos:\n"

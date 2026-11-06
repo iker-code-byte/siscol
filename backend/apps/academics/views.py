@@ -22,8 +22,12 @@ class CourseViewSet(viewsets.ModelViewSet):
         active_students_count=Count('enrollments', filter=Q(enrollments__status='ACTIVE'))
     ).order_by('name', 'parallel')
     serializer_class = CourseSerializer
-    permission_classes = [IsAdminOrTeacher]
     pagination_class = None
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.IsAuthenticated()]
+        return [IsAdminOrTeacher()]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -35,14 +39,22 @@ class CourseViewSet(viewsets.ModelViewSet):
 class SubjectViewSet(viewsets.ModelViewSet):
     queryset = Subject.objects.all().order_by('name')
     serializer_class = SubjectSerializer
-    permission_classes = [IsAdminOrTeacher]
     pagination_class = None
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.IsAuthenticated()]
+        return [IsAdminOrTeacher()]
 
 class TeacherViewSet(viewsets.ModelViewSet):
     queryset = Teacher.objects.all().select_related('user').order_by('last_name', 'first_name')
     serializer_class = TeacherSerializer
-    permission_classes = [IsAdminRole]
     pagination_class = None
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.IsAuthenticated()]
+        return [IsAdminRole()]
 
 class StudentViewSet(viewsets.ModelViewSet):
     queryset = Student.objects.all().select_related('user').prefetch_related(
@@ -163,17 +175,25 @@ def ensure_student_profile_and_assignments(user):
 
     for enr in enrollments:
         if not TeachingAssignment.objects.filter(course=enr.course, active=True).exists():
-            teachers = list(Teacher.objects.all())
-            subjects = list(Subject.objects.all())
-            if teachers and subjects:
-                for idx_s, subj in enumerate(subjects):
-                    TeachingAssignment.objects.get_or_create(
-                        teacher=teachers[idx_s % len(teachers)],
-                        course=enr.course,
-                        subject=subj,
-                        academic_year=enr.academic_year,
-                        defaults={'active': True}
-                    )
+            canonical_specs = [
+                ('Carlos', 'Mamani Rojas', '6284910-SC', 'MAT-101', 'Matemáticas'),
+                ('Elena', 'Morales Gutiérrez', '4918234-SC', 'LEN-101', 'Lenguaje y Literatura'),
+                ('Jorge', 'Salazar Peña', '5321890-SC', 'BIO-101', 'Ciencias Naturales y Biología'),
+                ('Patricia', 'Vaca Terrazas', '7104928-SC', 'SOC-101', 'Ciencias Sociales e Historia'),
+                ('Raúl', 'Flores Mendoza', '6592014-SC', 'FIS-101', 'Física y Química'),
+            ]
+            for t_first, t_last, t_doc, s_code, s_name in canonical_specs:
+                prof = Teacher.objects.filter(document_number=t_doc).first() or Teacher.objects.filter(first_name=t_first, last_name=t_last).first()
+                if not prof:
+                    prof = Teacher.objects.create(first_name=t_first, last_name=t_last, document_number=t_doc)
+                subj, _ = Subject.objects.get_or_create(code=s_code, defaults={'name': s_name})
+                TeachingAssignment.objects.get_or_create(
+                    teacher=prof,
+                    course=enr.course,
+                    subject=subj,
+                    academic_year=enr.academic_year,
+                    defaults={'active': True}
+                )
     return student, enrollments
 
 
