@@ -16,10 +16,14 @@ def serve_frontend(request, resource_path=''):
         candidate = (FRONTEND_DIST / clean_path).resolve()
         if str(candidate).startswith(str(FRONTEND_DIST.resolve())) and candidate.is_file():
             content_type, _ = mimetypes.guess_type(str(candidate))
-            return FileResponse(open(candidate, 'rb'), content_type=content_type or 'application/octet-stream')
+            resp = FileResponse(open(candidate, 'rb'), content_type=content_type or 'application/octet-stream')
+            resp['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+            return resp
     index_file = FRONTEND_DIST / 'index.html'
     if index_file.is_file():
-        return FileResponse(open(index_file, 'rb'), content_type='text/html; charset=utf-8')
+        resp = FileResponse(open(index_file, 'rb'), content_type='text/html; charset=utf-8')
+        resp['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        return resp
     raise Http404("index.html not found")
 
 

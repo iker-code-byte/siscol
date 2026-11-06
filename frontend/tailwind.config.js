@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
+        slate: {
           50: '#eff6ff',
           100: '#dbeafe',
           200: '#bfdbfe',
@@ -15,9 +15,9 @@ export default {
           400: '#60a5fa',
           500: '#2563eb',
           600: '#1d4ed8',
-          700: '#1e40af',
-          800: '#1e3a8a',
-          900: '#172554',
+          700: '#af1e23ff',
+          800: '#8a1e20ff',
+          900: '#54171bff',
           950: '#0e2138',
         },
         marist: {
