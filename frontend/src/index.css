@@ -4,6 +4,11 @@
 
 @layer base {
   body {
+    /* =====================================================================
+       CAMBIAR FONDO GENERAL Y COLOR DE LETRA DE TODAS LAS PANTALLAS:
+       - bg-slate-50: fondo claro general
+       - text-slate-900: color de texto normal
+       ===================================================================== */
     @apply bg-slate-50 text-slate-900 min-h-screen antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
@@ -14,6 +19,9 @@
   h4,
   h5,
   h6 {
+    /* =====================================================================
+       CAMBIAR TIPO DE LETRA (FUENTE) DE LOS TITULOS:
+       ===================================================================== */
     font-family: 'Outfit', sans-serif;
   }
 }

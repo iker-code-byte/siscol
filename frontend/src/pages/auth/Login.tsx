@@ -40,8 +40,13 @@ export const Login: React.FC = () => {
   };
 
   return (
+    /* =========================================================================
+       1. COLOR DE FONDO DE LA PANTALLA DE LOGIN:
+       - Modifica: bg-slate-950 (fondo muy oscuro actual)
+       - Puedes usar: bg-[#0f172a], bg-slate-900, bg-blue-950, etc.
+       ========================================================================= */
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background Glow */}
+      {/* Luces de fondo (Glow) */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -50,12 +55,19 @@ export const Login: React.FC = () => {
           <ArrowLeft className="w-3.5 h-3.5" /> Volver al portal
         </Link>
         <div className="mx-auto mb-3 flex justify-center">
+          {/* ===================================================================
+             2. LOGO EN EL LOGIN:
+             - w-20 h-20: tamaño
+             =================================================================== */}
           <img
             src="/marista-logo.png"
             alt="U.E. Gabriel René Moreno II Fe y Alegría Marista"
             className="w-20 h-20 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)] transition-transform hover:scale-105 duration-300"
           />
         </div>
+        {/* =====================================================================
+           3. TÍTULOS Y LETRAS DEL ENCABEZADO:
+           ===================================================================== */}
         <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white leading-tight">
           U.E. Gabriel René Moreno II
         </h2>
@@ -68,6 +80,10 @@ export const Login: React.FC = () => {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10 px-4">
+        {/* =====================================================================
+           4. CAJA DEL FORMULARIO DE LOGIN (FONDO Y BORDES):
+           - bg-slate-900/90: color de fondo de la caja
+           ===================================================================== */}
         <div className="bg-slate-900/90 border border-slate-800/90 backdrop-blur-md py-8 px-6 shadow-2xl rounded-3xl sm:px-10">
           <form className="space-y-5" onSubmit={handleSubmit}>
             {error && (
@@ -111,6 +127,10 @@ export const Login: React.FC = () => {
               </div>
             </div>
 
+            {/* =================================================================
+               5. BOTÓN DE INICIAR SESIÓN (COLOR DEL BOTÓN):
+               - bg-blue-600 hover:bg-blue-700
+               ================================================================= */}
             <Button type="submit" variant="primary" size="lg" className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white font-bold border-none shadow-lg shadow-blue-600/25" isLoading={isLoading}>
               Iniciar Sesión
             </Button>

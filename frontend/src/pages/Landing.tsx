@@ -5,20 +5,33 @@ import { Button } from '../components/common/Button';
 
 export const Landing: React.FC = () => {
   return (
+    /* =========================================================================
+       1. COLOR DE FONDO DE TODA LA PÁGINA DE INICIO:
+       - Modifica: bg-gradient-to-b from-slate-950 via-[#0e2138] to-slate-950
+       - O reemplázalo por un color sólido como: bg-[#0f172a] o bg-slate-900
+       ========================================================================= */
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-[#0e2138] to-slate-950 text-white flex flex-col justify-between relative overflow-hidden">
-      {/* Decorative Glows */}
+      {/* Luces decorativas de fondo (Glow) */}
       <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/3 -left-20 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Header */}
+      {/* Header superior */}
       <header className="px-6 py-6 max-w-6xl mx-auto w-full flex items-center justify-between z-10">
         <div className="flex items-center gap-3.5">
+          {/* ===================================================================
+             2. IMAGEN / LOGO DEL COLEGIO:
+             - src: ruta de la imagen en frontend/public/marista-logo.png
+             - w-12 h-12: tamaño (ancho y alto)
+             =================================================================== */}
           <img
             src="/marista-logo.png"
             alt="Escudo Marista"
             className="w-12 h-12 object-contain drop-shadow-md transition-transform hover:scale-105"
           />
           <div>
+            {/* =================================================================
+               3. TEXTOS DEL ENCABEZADO:
+               ================================================================= */}
             <h1 className="text-base sm:text-lg font-bold tracking-tight text-white leading-tight">
               U.E. Gabriel René Moreno II
             </h1>
@@ -35,17 +48,25 @@ export const Landing: React.FC = () => {
         </Link>
       </header>
 
-      {/* Hero Section */}
+      {/* Contenido Principal (Hero) */}
       <main className="px-6 py-12 max-w-4xl mx-auto w-full text-center z-10">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/15 border border-blue-400/30 text-blue-300 text-xs font-semibold mb-6 shadow-sm">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
           Plataforma Institucional Oficial — Gestión 2026
         </div>
 
+        {/* =====================================================================
+           4. TÍTULO GRANDE DE LA PORTADA:
+           - text-white: color de letra principal
+           - text-blue-400: color de las palabras resaltadas
+           ===================================================================== */}
         <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6 leading-tight">
           Gestión Digital de <span className="text-blue-400">Notas</span>, <span className="text-blue-400">Asistencia</span> y Alertas a Tutores
         </h2>
 
+        {/* =====================================================================
+           5. PÁRRAFO DESCRIPTIVO DE LA PORTADA:
+           ===================================================================== */}
         <p className="text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl mx-auto mb-12 leading-relaxed">
           Plataforma oficial de la <strong className="text-white font-semibold">U.E. Gabriel René Moreno II Fe y Alegría Marista</strong>. Planillas bimestrales para docentes, consulta de avance para estudiantes y notificaciones automáticas a padres y tutores.
         </p>
